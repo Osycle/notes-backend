@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, I
 class CellsViewSet(viewsets.ModelViewSet):
   serializer_class = CellsSerializer
   permission_classes = (IsAuthenticated,)
-  # queryset = Cells.objects.all()
+  queryset = Cells.objects.all()
   def list(self, request):
     cells_all = Cells.objects.all()
     tags_all = Tags.objects.all()
@@ -30,52 +30,44 @@ class CellsViewSet(viewsets.ModelViewSet):
 
   def create(self, request):
     data = request.data
-    print('cccccccccccccccccccccccccccccccccccccccccccccc', request.user.id, data.get('tags'))
     cell_new = Cells.objects.create(content=data['content'], user_id=request.user.id)
-    # cell_new = Cells.objects.create(content="my test") 
-    # print(cell_new, 22222222222222222222222222222222222222222222)
     if 'tags' in data:
       cell_new.set_cell_tags(data['tags'], request.user.id)
-    
     return Response({
       "status": True,
       "cell": CellsSerializer(cell_new).data
     })
 
-
-  def update(self, request, pk=None):
+  def edit(request, pk=None):
     data = request.data
     update_tags = data['tags']
-
+    print(request.data, request, 'request.data', pk, 'pk')
     try:
       cell = Cells.objects.get(pk=pk)
     except:
       return Response({"error": "Object does not exists"})
-
+    # print(request.user.id, 'request.user.id', pk, 'pk')
     for tag in cell.tags.all():
       if not tag.name in update_tags:
         if not Cells.objects.exclude(pk=pk).filter(tags__name=tag.name):
           Tags.objects.get(pk=tag.pk).delete()
-
-    cell.set_cell_tags(update_tags, user_id=request.user.id)
-
+    cell.set_cell_tags(update_tags, request.user.id)
     cell_ser = CellsSerializer(data=data, instance=cell)          
     cell_ser.is_valid(raise_exception=True)
     cell_ser.save(commit=False)
-
+    print(cell_ser, 'cell_ser')
     return Response({
       "status": True,
       "cell": cell_ser.data
     })
 
-  def destroy(self, request, pk=None):
+  def delete(request, pk=None):
     cell = Cells.objects.get(pk=pk)
     for tag in cell.tags.all():
       if not Cells.objects.exclude(pk=pk).filter(tags__name=tag.name):
         Tags.objects.get(pk=tag.pk).delete()
     cell_id = cell.id
     result = cell.delete()
-    
     return Response({
       "status": True,
       "cell_id": cell_id,

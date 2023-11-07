@@ -16,22 +16,17 @@ class Cells(models.Model):
   # print(User.objects.get(pk=2), 11111111111111111111111)
   
   def set_cell_tags(self, tags, user_id):
-    set_tags_list = []
-    # print(User.objects, 99999999999999999999999999999999999)
-    
+    set_tags_list = []  
     if tags:
       for tag in tags:
-        t = Tags.objects.filter(name=tag)
-        if not t:
-          tag_new = Tags.objects.create(name=tag, user_id=user_id).save()
-        else:
-          tag_new = t[0]
+        tag_new, bol = Tags.objects.get_or_create(name=tag, user_id=user_id)
+        print(tag_new, bol, 'tag_new, bol')
         set_tags_list.append(tag_new)
-    self.tags.set(set_tags_list)
+      self.tags.set(set_tags_list)
     return self
 
-  def __str__(self):
-    return self.content
+  # def __str__(self):
+  #   return self.content
 
 class Tags(models.Model):
   name = models.TextField(blank=True, verbose_name="Имя")
