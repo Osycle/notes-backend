@@ -7,6 +7,7 @@ from remeapp.views import *
 router = routers.DefaultRouter() 
 router.register(r"cells", CellsViewSet, basename='cells')
 router.register(r"tags", TagsViewSet, basename='tags')
+router.register(r"userinfo", UserViewSet, basename='userinfo')
 
 urlpatterns = [
 	path('admin/', admin.site.urls),

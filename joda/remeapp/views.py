@@ -9,6 +9,7 @@ from .serializers import *
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated
 
 
+
 # IsAuthenticatedOrReadOnly - только автаризованные
 # IsAdminUser - только автаризованные
 
@@ -23,6 +24,7 @@ class CellsViewSet(viewsets.ModelViewSet):
   def list(self, request):
     cells_all = Cells.objects.all()
     tags_all = Tags.objects.all()
+    print('METHOD LIST')
     return Response({
       "cells": CellsSerializer(cells_all, many=True).data,
       "tags": TagsSerializer(tags_all, many=True).data,
@@ -76,10 +78,23 @@ class CellsViewSet(viewsets.ModelViewSet):
 
 class TagsViewSet(viewsets.ModelViewSet):
   serializer_class = TagsSerializer
+  permission_classes = (IsAuthenticated,)
   # permission_classes = (IsOwnerOrReadOnly,)
   def list(self, request):
     tags_all = Tags.objects.all()
     return Response({
       "status": True,
       "tags": TagsSerializer(tags_all, many=True).data,
+    })
+
+class UserViewSet(viewsets.ModelViewSet):
+  serializer_class = UserSer
+  # permission_classes = (IsOwnerOrReadOnly,)
+  # queryset = User.objects.all()
+  def list(self, request):
+    print(request.user.id)
+    tags_all = User.objects.filter(pk=request.user.id)
+    # print(list(tags_all), 'pint2')
+    return Response({
+      "tags": UserSer(tags_all, many=True).data,
     })
